@@ -11,6 +11,7 @@ import frc.robot.commands.CAS.EjectBall;
 import frc.robot.commands.CAS.RobotOff;
 import frc.robot.commands.SetSubsystemCommand.*;
 import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import static frc.robot.Constants.*;
@@ -49,7 +50,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private Swerve s_Swerve;
   private IndexerSubsystem m_indexerSubsystem;
-  private ShooterSubsystem m_shooterSubsystem;  
+  private ShooterSubsystem m_shooterSubsystem;
+  private TurretSubsystem m_turretSubsystem;
   /*private static PowerDistribution powerModule = new PowerDistribution(1, ModuleType.kRev);
 
   public static PowerDistribution getPDP(){
@@ -62,6 +64,7 @@ public class RobotContainer {
     s_Swerve = Swerve.getInstance();
     m_indexerSubsystem = IndexerSubsystem.getInstance();
     m_shooterSubsystem = ShooterSubsystem.getInstance();
+    m_turretSubsystem = TurretSubsystem.getInstance();
     s_Swerve.zeroGyro();
     // sets the teleop swerve command as default command with the input from driver joysticks
     // to control the swerve
@@ -131,11 +134,11 @@ public class RobotContainer {
     //FIRST CONTROLLER
 
     //DPAD
-    // Trigger dpadUp = new Trigger(() -> {return driver.getDpadUp();});
-    // Trigger dpadUpRight = new Trigger(() -> {return driver.getDpadUpRight();});
-    // Trigger dpadDown = new Trigger(() -> {return driver.getDpadDown();});
-    // Trigger dpadLeft = new Trigger(() -> {return driver.getDpadLeft();});
-    // Trigger dpadRight = new Trigger(() -> {return driver.getDpadRight();});
+    Trigger dpadUp = new Trigger(() -> {return driver.getDpadUp();});
+    Trigger dpadUpRight = new Trigger(() -> {return driver.getDpadUpRight();});
+    Trigger dpadDown = new Trigger(() -> {return driver.getDpadDown();});
+    Trigger dpadLeft = new Trigger(() -> {return driver.getDpadLeft();});
+    Trigger dpadRight = new Trigger(() -> {return driver.getDpadRight();});
   
     //dpad up and dpad right controls left and right climb. press both to move at the same time
     // dpadUp.onTrue(new InstantCommand(() -> ClimbSubsystem.getInstance().leftClimbPower(climbUp)))
@@ -153,6 +156,10 @@ public class RobotContainer {
     //   .onFalse(new InstantCommand(() -> ClimbSubsystem.getInstance().rightClimbPower(0)));   
     // dpadLeft.onTrue(new InstantCommand(() -> ClimbSubsystem.getInstance().pivotPower(pivotDown)))
     //   .onFalse(new InstantCommand(() -> ClimbSubsystem.getInstance().pivotPower(0)));
+
+    Trigger dpadUp.onTrue(new SetTurretCommand(true));
+    Trigger dpadDown.onTrue(new SetTurretCommand(false));
+
 
     driverStart.onTrue(new InstantCommand(() -> s_Swerve.resetOdometry(new Pose2d())));// resets to 0 -> for testing only
     driverBack.onTrue(new InstantCommand(() -> s_Swerve.resetOdometry(new Pose2d())));// resets to 0 -> for testing only
@@ -183,6 +190,10 @@ public class RobotContainer {
     //leftTriggerAxis.whileActiveOnce(new AimShoot());
     //leftTriggerAxis.onFalse(new SequentialCommandGroup(new WaitCommand(0.6), new RobotIdle()));
     //leftTriggerAxis.whileActiveOnce(new EjectBall());
+
+    m_controller.getXButton().onTrue(new InstantCommand(() -> m_turretSubsystem.increaseKp()));
+    m_controller.getYButton().onTrue(new InstantCommand(() -> m_turretSubsystem.increaseKi()));
+    m_controller.getBButton().onTrue(new InstantCommand(() -> m_turretSubsystem.increaseKd()));
     
   //  leftTriggerAxis.onTrue(new InstantCommand(() -> PivotSubsystem.getInstance().deployIntake()))
   //  .onTrue(new InstantCommand(() -> IndexerSubsystem.getInstance().automaticIntaking()))
